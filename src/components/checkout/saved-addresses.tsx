@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog";
 import {
     getAddresses,
     deleteAddress,
@@ -138,155 +144,202 @@ export default function SavedAddresses() {
     }
 
     return (
-        <div className="glass rounded-[32px] p-8">
-            <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold">
-                    Saved Addresses
-                </h2>
-
-                <span className="text-sm text-gray-400">
-                    {
-                        addresses.length
-                    }{" "}
-                    Saved
-                </span>
+        <div className="glass rounded-2xl p-5">
+          {/* HEADER */}
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-semibold">
+                Saved Addresses
+              </h2>
+      
+              <p className="text-xs text-gray-400 mt-1">
+                Select delivery address
+              </p>
             </div>
-
-            {addresses.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">
-                    No saved addresses
-                </div>
-            ) : (
-                <div className="space-y-5">
-                    {addresses.map(
-                        (address: any) => (
-                            <div
-                                key={
-                                    address._id
-                                }
-                                onClick={() =>
-                                    setSelectedAddress(
-                                        address
-                                    )
-                                }
-                                className={`border rounded-3xl p-5 cursor-pointer transition-all duration-300 ${selectedAddress?._id ===
-                                        address._id
-                                        ? "border-purple-500 bg-purple-500/10"
-                                        : "border-white/10 hover:border-purple-500/40"
-                                    }`}
+      
+            <span className="text-xs text-gray-400">
+              {addresses.length} Saved
+            </span>
+          </div>
+      
+          {/* EMPTY */}
+          {addresses.length === 0 ? (
+            <div className="text-sm text-gray-500 py-6 text-center">
+              No saved addresses
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {addresses.map(
+                (address: any) => {
+                  const isSelected =
+                    selectedAddress?._id ===
+                    address._id;
+      
+                  return (
+                    <div
+                      key={address._id}
+                      className={`rounded-xl border transition ${
+                        isSelected
+                          ? "border-purple-500 bg-purple-500/10"
+                          : "border-white/10"
+                      }`}
+                    >
+                      {/* COMPACT ROW */}
+                      <div className="flex items-center justify-between p-4">
+                        {/* LEFT */}
+                        <button
+                          onClick={() =>
+                            setSelectedAddress(
+                              address
+                            )
+                          }
+                          className="flex-1 text-left"
+                        >
+                          <h3 className="text-sm font-medium">
+                            {
+                              address.fullName
+                            }
+                          </h3>
+      
+                          <p className="text-xs text-gray-400 mt-1">
+                            PIN:{" "}
+                            {
+                              address.pincode
+                            }
+                          </p>
+                        </button>
+      
+                        {/* RIGHT */}
+                        <div className="flex items-center gap-2">
+                          {/* VIEW MODAL */}
+                          <Dialog>
+                            <DialogTrigger
+                              asChild
                             >
-                                <div className="flex items-start justify-between gap-5">
-                                    {/* LEFT */}
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 flex-wrap">
-                                            <h3 className="font-semibold text-lg">
-                                                {
-                                                    address.fullName
-                                                }
-                                            </h3>
-
-                                            {address.isDefault && (
-                                                <span className="px-3 py-1 rounded-full text-xs bg-purple-500 text-white">
-                                                    Default
-                                                </span>
-                                            )}
-
-                                            {selectedAddress?._id ===
-                                                address._id && (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-green-500 text-white">
-                                                        Selected
-                                                    </span>
-                                                )}
-                                        </div>
-
-                                        <p className="mt-3 text-gray-300">
-                                            {
-                                                address.address
-                                            }
-                                        </p>
-
-                                        <p className="text-gray-400">
-                                            {
-                                                address.city
-                                            }
-                                            ,{" "}
-                                            {
-                                                address.state
-                                            }{" "}
-                                            -{" "}
-                                            {
-                                                address.pincode
-                                            }
-                                        </p>
-
-                                        <p className="text-gray-400">
-                                            {
-                                                address.country
-                                            }
-                                        </p>
-
-                                        {address.landmark && (
-                                            <p className="text-gray-500 mt-1">
-                                                Landmark:{" "}
-                                                {
-                                                    address.landmark
-                                                }
-                                            </p>
-                                        )}
-
-                                        <p className="mt-3 font-medium">
-                                            {
-                                                address.phone
-                                            }
-                                        </p>
-
-                                        <p className="text-gray-400 text-sm">
-                                            {
-                                                address.email
-                                            }
-                                        </p>
-                                    </div>
-
-                                    {/* RIGHT */}
-                                    <div className="flex flex-col gap-3">
-                                        {!address.isDefault && (
-                                            <button
-                                                onClick={(
-                                                    e
-                                                ) => {
-                                                    e.stopPropagation();
-
-                                                    handleDefault(
-                                                        address._id
-                                                    );
-                                                }}
-                                                className="px-4 py-2 rounded-xl border border-white/10 hover:border-purple-500 transition text-sm"
-                                            >
-                                                Set Default
-                                            </button>
-                                        )}
-
-                                        <button
-                                            onClick={(
-                                                e
-                                            ) => {
-                                                e.stopPropagation();
-
-                                                handleDelete(
-                                                    address._id
-                                                );
-                                            }}
-                                            className="px-4 py-2 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500/10 transition text-sm"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
+                              <button className="h-8 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition text-xs">
+                                View
+                              </button>
+                            </DialogTrigger>
+      
+                            <DialogContent className="bg-[#111827] border border-white/10 text-white rounded-2xl">
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Delivery
+                                  Address
+                                </DialogTitle>
+                              </DialogHeader>
+      
+                              <div className="space-y-4 mt-4">
+                                <div>
+                                  <p className="text-xs text-gray-400 mb-1">
+                                    Name
+                                  </p>
+      
+                                  <p className="text-sm">
+                                    {
+                                      address.fullName
+                                    }
+                                  </p>
                                 </div>
-                            </div>
-                        )
-                    )}
-                </div>
-            )}
+      
+                                <div>
+                                  <p className="text-xs text-gray-400 mb-1">
+                                    Phone
+                                  </p>
+      
+                                  <p className="text-sm">
+                                    {
+                                      address.phone
+                                    }
+                                  </p>
+                                </div>
+      
+                                <div>
+                                  <p className="text-xs text-gray-400 mb-1">
+                                    Address
+                                  </p>
+      
+                                  <p className="text-sm leading-6">
+                                    {
+                                      address.address
+                                    }
+                                  </p>
+                                </div>
+      
+                                <div className="grid grid-cols-3 gap-4">
+                                  <div>
+                                    <p className="text-xs text-gray-400 mb-1">
+                                      City
+                                    </p>
+      
+                                    <p className="text-sm">
+                                      {
+                                        address.city
+                                      }
+                                    </p>
+                                  </div>
+      
+                                  <div>
+                                    <p className="text-xs text-gray-400 mb-1">
+                                      State
+                                    </p>
+      
+                                    <p className="text-sm">
+                                      {
+                                        address.state
+                                      }
+                                    </p>
+                                  </div>
+      
+                                  <div>
+                                    <p className="text-xs text-gray-400 mb-1">
+                                      Pincode
+                                    </p>
+      
+                                    <p className="text-sm">
+                                      {
+                                        address.pincode
+                                      }
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+      
+                          {/* DEFAULT */}
+                          {!address.isDefault && (
+                            <button
+                              onClick={() =>
+                                handleDefault(
+                                  address._id
+                                )
+                              }
+                              className="h-8 px-3 rounded-lg bg-purple-500/10 hover:bg-purple-500 text-purple-400 hover:text-white transition text-xs"
+                            >
+                              Default
+                            </button>
+                          )}
+      
+                          {/* DELETE */}
+                          <button
+                            onClick={() =>
+                              handleDelete(
+                                address._id
+                              )
+                            }
+                            className="h-8 px-3 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition text-xs"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          )}
         </div>
-    );
+      );
 }

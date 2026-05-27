@@ -13,6 +13,13 @@ import { verifyPayment } from "@/services/payment.service";
 
 import SavedAddresses from "@/components/checkout/saved-addresses";
 import AddressForm from "@/components/checkout/address-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 declare global {
   interface Window {
@@ -224,7 +231,42 @@ export default function CheckoutPage() {
               <SavedAddresses />
 
               {/* ADD NEW ADDRESS */}
-              <AddressForm />
+              {/* HEADER */}
+<div className="flex items-center justify-between mb-6">
+  <div>
+    <h2 className="text-2xl font-bold">
+          Add New Address
+    </h2>
+
+    <p className="text-gray-500 mt-1 text-sm">
+      Select a delivery address
+    </p>
+  </div>
+
+  {/* ADD ADDRESS */}
+  <Dialog>
+    <DialogTrigger asChild>
+      <button className="h-11 px-5 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white text-sm font-medium hover:opacity-90 transition">
+        Add New
+      </button>
+    </DialogTrigger>
+
+    {/* MODAL */}
+    <DialogContent className="bg-[#111827] border border-white/10 text-white rounded-3xl max-w-2xl">
+      <DialogHeader>
+        <DialogTitle className="text-2xl font-bold">
+          Add New Address
+        </DialogTitle>
+      </DialogHeader>
+
+      {/* FORM */}
+      <div className="mt-4">
+        <AddressForm />
+      </div>
+    </DialogContent>
+  </Dialog>
+</div>
+              
 
               {/* CART ITEMS */}
               <div className="space-y-6">

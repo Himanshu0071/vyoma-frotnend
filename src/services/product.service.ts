@@ -3,9 +3,20 @@ import axios from "axios";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL;
 
-export const getProducts = async () => {
+export const getProducts = async (
+  keyword = "",
+  category = "",
+  sort = ""
+) => {
   const response = await axios.get(
-    `${API_URL}/products`
+    `${API_URL}/products`,
+    {
+      params: {
+        keyword,
+        category,
+        sort,
+      },
+    }
   );
 
   return response.data;

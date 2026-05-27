@@ -146,7 +146,7 @@ export default function OrdersPage() {
                     </p>
 
                     <h2 className="font-bold gradient-text">
-                      $
+                      ₹
                       {order.totalPrice.toFixed(
                         2
                       )}
@@ -175,7 +175,7 @@ export default function OrdersPage() {
                         </div>
 
                         <p className="font-semibold">
-                          $
+                          ₹
                           {item.price}
                         </p>
                       </div>

@@ -1,186 +1,318 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
+import Image from "next/image";
 import toast from "react-hot-toast";
-
 import { useCartStore } from "@/store/cart.store";
+import { createPaymentOrder } from "@/services/payment.service";
+import {
+  verifyPayment,
+} from "@/services/payment.service";
 
 import { useAuthStore } from "@/store/auth.store";
 
-import { createOrder } from "@/services/order.service";
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CheckoutPage() {
-  const router = useRouter();
+  const {
+    cart,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart,
+  } = useCartStore();
 
-  const { cart, clearCart } =
-    useCartStore();
+  /* =========================
+     TOTAL PRICE
+  ========================= */
 
-  const { user, token } =
-    useAuthStore();
-
-  const [formData, setFormData] =
-    useState({
-      fullName: "",
-      phone: "",
-      address: "",
-      city: "",
-      postalCode: "",
-      country: "",
-    });
-
-  const subtotal = cart.reduce(
+  const totalPrice = cart.reduce(
     (acc, item) =>
       acc + item.price * item.quantity,
     0
   );
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  /* =========================
+     HANDLE PAYMENT
+  ========================= */
 
-  const handleOrder = async () => {
-    if (!user || !token) {
-      toast.error(
-        "Please login first"
-      );
+  const handlePayment =
+    async () => {
+      try {
+        if (cart.length === 0) {
+          toast.error(
+            "Cart is empty"
+          );
 
-      router.push("/login");
+          return;
+        }
 
-      return;
-    }
+        const order =
+          await createPaymentOrder(
+            totalPrice
+          );
 
-    try {
-      await createOrder(
-        {
-          items: cart.map((item) => ({
-            productId: item._id,
-            title: item.title,
-            image: item.image,
-            price: item.price,
-            quantity: item.quantity,
-          })),
+        const options = {
+          key: process.env
+            .NEXT_PUBLIC_RAZORPAY_KEY_ID,
 
-          shippingAddress: formData,
+          amount: order.amount,
 
-          totalPrice: subtotal,
-        },
+          currency: order.currency,
 
-        token
-      );
+          name: "Vyoma",
 
-      toast.success(
-        "Order placed successfully"
-      );
+          description:
+            "Premium Fashion Marketplace",
 
-      clearCart();
+          order_id: order.id,
 
-      router.push("/orders");
-    } catch (error) {
-      console.log(error);
+          handler: async (
+            response: any
+          ) => {
+            try {
+              await verifyPayment({
+                razorpay_order_id:
+                  response.razorpay_order_id,
 
-      toast.error(
-        "Failed to place order"
-      );
-    }
-  };
+                razorpay_payment_id:
+                  response.razorpay_payment_id,
+
+                razorpay_signature:
+                  response.razorpay_signature,
+
+                orderItems: cart.map(
+                  (item) => ({
+                    title:
+                      item.title,
+
+                    quantity:
+                      item.quantity,
+
+                    image:
+                      item.image,
+
+                    price:
+                      item.price,
+
+                    product:
+                      item._id,
+
+                    email: user?.email,
+                    name: user?.name,
+                  })
+                ),
+
+                totalPrice,
+
+                userId: user?.id,
+              });
+
+              toast.success(
+                "Payment verified!"
+              );
+
+              clearCart();
+            } catch (error) {
+              console.log(error);
+
+              toast.error(
+                "Verification failed"
+              );
+            }
+          },
+
+          prefill: {
+            name: "Vyoma User",
+            email:
+              "customer@vyoma.com",
+          },
+
+          theme: {
+            color: "#7C8CFF",
+          },
+        };
+
+        const razorpay =
+          new window.Razorpay(
+            options
+          );
+
+        razorpay.open();
+      } catch (error) {
+        console.log(error);
+
+        toast.error(
+          "Payment failed"
+        );
+      }
+    };
+
+  const { user } =
+    useAuthStore();
 
   return (
     <section className="py-24">
-      <div className="container-custom grid lg:grid-cols-2 gap-16">
+      <div className="container-custom">
 
-        {/* Form */}
-        <div className="space-y-6">
+        {/* Heading */}
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold">
+            Checkout
+          </h1>
 
-          <div>
-            <h1 className="text-5xl font-bold">
-              Checkout
-            </h1>
-
-            <p className="text-gray-500 mt-4">
-              Enter shipping details
-            </p>
-          </div>
-
-          {[
-            "fullName",
-            "phone",
-            "address",
-            "city",
-            "postalCode",
-            "country",
-          ].map((field) => (
-            <input
-              key={field}
-              type="text"
-              name={field}
-              placeholder={field}
-              value={
-                formData[
-                  field as keyof typeof formData
-                ]
-              }
-              onChange={handleChange}
-              className="w-full h-14 px-5 rounded-2xl bg-transparent border border-gray-300 dark:border-white/10 outline-none"
-            />
-          ))}
-
-          <button
-            onClick={handleOrder}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white font-semibold"
-          >
-            Place Order
-          </button>
+          <p className="text-gray-500 mt-4">
+            Complete your purchase
+          </p>
         </div>
 
-        {/* Summary */}
-        <div className="glass rounded-[32px] p-8 h-fit">
+        {cart.length === 0 ? (
+          <div className="glass rounded-[32px] p-10 text-center">
+            Your cart is empty
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-3 gap-10">
 
-          <h2 className="text-3xl font-bold mb-8">
-            Order Summary
-          </h2>
+            {/* Cart Items */}
+            <div className="lg:col-span-2 space-y-6">
 
-          <div className="space-y-6">
+              {cart.map((item) => (
+                <div
+                  key={item._id}
+                  className="glass rounded-[32px] p-6 flex gap-6"
+                >
+                  {/* Image */}
+                  <div className="relative w-32 h-32 rounded-2xl overflow-hidden">
 
-            {cart.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between"
-              >
-                <div>
-                  <h3 className="font-semibold">
-                    {item.title}
-                  </h3>
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
 
-                  <p className="text-sm text-gray-500">
-                    Qty: {item.quantity}
-                  </p>
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-between">
+
+                    <div>
+                      <h2 className="text-2xl font-semibold">
+                        {item.title}
+                      </h2>
+
+                      <p className="text-gray-500 mt-2">
+                        ₹
+                        {item.price}
+                      </p>
+                    </div>
+
+                    {/* Quantity */}
+                    <div className="flex items-center gap-4 mt-4">
+
+                      <button
+                        onClick={() =>
+                          decreaseQuantity(
+                            item._id
+                          )
+                        }
+                        className="w-10 h-10 rounded-full border border-gray-300 dark:border-white/10"
+                      >
+                        -
+                      </button>
+
+                      <span className="text-lg font-semibold">
+                        {
+                          item.quantity
+                        }
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          increaseQuantity(
+                            item._id
+                          )
+                        }
+                        className="w-10 h-10 rounded-full border border-gray-300 dark:border-white/10"
+                      >
+                        +
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          removeFromCart(
+                            item._id
+                          )
+                        }
+                        className="ml-auto text-red-500"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary */}
+            <div className="glass rounded-[32px] p-8 h-fit sticky top-28">
+
+              <h2 className="text-3xl font-bold mb-8">
+                Order Summary
+              </h2>
+
+              <div className="space-y-5">
+
+                <div className="flex justify-between">
+                  <span>
+                    Subtotal
+                  </span>
+
+                  <span>
+                    ₹
+                    {totalPrice.toFixed(
+                      2
+                    )}
+                  </span>
                 </div>
 
-                <p className="font-bold">
-                  $
-                  {item.price *
-                    item.quantity}
-                </p>
+                <div className="flex justify-between">
+                  <span>
+                    Shipping
+                  </span>
+
+                  <span>
+                    Free
+                  </span>
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-white/10 pt-5 flex justify-between text-xl font-bold">
+
+                  <span>Total</span>
+
+                  <span className="gradient-text">
+                    ₹
+                    {totalPrice.toFixed(
+                      2
+                    )}
+                  </span>
+                </div>
               </div>
-            ))}
 
-            <div className="border-t border-gray-200 dark:border-white/10 pt-6 flex items-center justify-between text-2xl font-bold">
-              <span>Total</span>
-
-              <span className="gradient-text">
-                ${subtotal.toFixed(2)}
-              </span>
+              {/* Payment Button */}
+              <button
+                onClick={
+                  handlePayment
+                }
+                className="w-full mt-8 py-5 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white font-semibold text-lg hover:opacity-90 transition"
+              >
+                Pay with Razorpay
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

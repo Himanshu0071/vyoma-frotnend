@@ -82,12 +82,15 @@ export default function Navbar() {
             </button>
 
             {/* Wishlist */}
-            <button className="hidden md:block">
+            <Link
+              href="/wishlist"
+              className="hidden md:block"
+            >
               <FontAwesomeIcon
                 icon={faHeart}
                 className="text-lg hover:text-pink-400 transition"
               />
-            </button>
+            </Link>
 
             {/* Cart */}
             <button
@@ -143,6 +146,12 @@ export default function Navbar() {
               </>
             ) : (
               <div className="hidden md:flex items-center gap-4">
+                <Link
+                  href="/profile"
+                  className="text-sm"
+                >
+                  Profile
+                </Link>
 
                 <p className="text-sm">
                   Hi, {user.name}

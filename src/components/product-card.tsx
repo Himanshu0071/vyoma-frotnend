@@ -1,81 +1,105 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "framer-motion";
 import Link from "next/link";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import Image from "next/image";
+import { Product } from "@/types/product";
 import {
   faHeart,
-  faBagShopping,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useWishlistStore } from "@/store/wishlist.store";
+import toast from "react-hot-toast";
 
 interface ProductCardProps {
-    id: string;
-    title: string;
-    category: string;
-    price: string;
-    image: string;
-  }
+  product: Product;
+}
 
 export default function ProductCard({
-    id,
-    title,
-    category,
-    price,
-    image,
+  product,
 }: ProductCardProps) {
+
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+  } = useWishlistStore();
+
+  const liked =
+    product?._id
+      ? isInWishlist(product._id)
+      : false;
+
   return (
-    <Link href={`/product/${id}`}>
-    <motion.div
-      whileHover={{ y: -10 }}
-      transition={{ duration: 0.3 }}
-      className="group relative rounded-[32px] overflow-hidden bg-white dark:bg-[#0D1324] shadow-soft"
+    <Link
+      href={`/product/${product._id}`}
+      className="group"
     >
-      {/* Image */}
-      <div className="relative overflow-hidden">
-        <Image
-          src={image}
-          alt={title}
-          width={500}
-          height={500}
-          className="w-full h-[350px] object-cover group-hover:scale-105 transition duration-500"
-        />
+      <div className="glass rounded-[32px] overflow-hidden hover:-translate-y-2 transition duration-500">
 
-        {/* Floating Buttons */}
-        <div className="absolute top-5 right-5 flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition duration-300">
-          <button className="w-11 h-11 rounded-full glass flex items-center justify-center">
-            <FontAwesomeIcon icon={faHeart} />
-          </button>
+        {/* Image */}
+        <div className="relative overflow-hidden">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
 
-          <button className="w-11 h-11 rounded-full glass flex items-center justify-center">
-            <FontAwesomeIcon icon={faBagShopping} />
+              if (liked) {
+                removeFromWishlist(
+                  product._id
+                );
+
+                toast.success(
+                  "Removed from wishlist"
+                );
+              } else {
+                addToWishlist(product);
+
+                toast.success(
+                  "Added to wishlist"
+                );
+              }
+            }}
+            className="absolute top-5 right-5 z-20 w-11 h-11 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-md flex items-center justify-center hover:scale-110 transition"          >
+            <FontAwesomeIcon
+              icon={faHeart}
+              className={
+                liked
+                  ? "text-red-500"
+                  : "text-black dark:text-white"
+              }
+            />
           </button>
+          <Image
+            src={product.images?.[0] || "/placeholder.png"}
+            alt={product.title}
+            width={500}
+            height={600}
+            className="w-full h-[420px] object-cover group-hover:scale-105 transition duration-700 relative z-0"
+          />
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+
+          <div className="flex items-center justify-between mb-4">
+
+            <span className="text-xs uppercase tracking-[3px] text-purple-400">
+              {product.category}
+            </span>
+
+            <span className="text-lg font-bold gradient-text">
+              ${product.price}
+            </span>
+          </div>
+
+          <h3 className="text-xl font-semibold mb-3">
+            {product.title}
+          </h3>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+            {product.description}
+          </p>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="p-6 space-y-3">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {category}
-        </p>
-
-        <h3 className="text-xl font-semibold">
-          {title}
-        </h3>
-
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold gradient-text">
-            {price}
-          </span>
-
-          <button className="px-5 py-2 rounded-full bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white text-sm font-medium">
-            Buy Now
-          </button>
-        </div>
-      </div>
-    </motion.div>
     </Link>
   );
 }

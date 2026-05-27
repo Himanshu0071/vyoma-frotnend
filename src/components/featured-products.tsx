@@ -32,7 +32,7 @@ export default function FeaturedProducts() {
     fetchProducts();
   }, []);
 
-  console.log(products,"data")
+  console.log(products, "data")
 
   return (
     <section className="py-24">
@@ -60,12 +60,8 @@ export default function FeaturedProducts() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {products.map((product) => (
               <ProductCard
-                id={product._id}
                 key={product._id}
-                title={product.title}
-                category={product.category}
-                price={`$${product.price}`}
-                image={product.images[0]}
+                product={product}
               />
             ))}
           </div>

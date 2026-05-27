@@ -4,6 +4,29 @@ const API_URL =
   process.env
     .NEXT_PUBLIC_API_URL;
 
+    /* =========================
+   CREATE ORDER
+========================= */
+
+export const createOrder =
+  async (
+    orderData: any,
+    token: string
+  ) => {
+    const response =
+      await axios.post(
+        `${API_URL}/orders`,
+        orderData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+    return response.data;
+  };
+
 /* =========================
    GET ALL ORDERS
 ========================= */

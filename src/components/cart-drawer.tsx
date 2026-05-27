@@ -161,8 +161,9 @@ export default function CartDrawer({
                     </div>
 
                     <Link
+                      onClick={() => setOpen(false)}
                         href="/checkout"
-                        className="block text-center w-full py-4 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white font-semibold"
+                        className="block text-center w-full py-4 rounded-2xl bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white font-semibold"
                     >
                         Checkout
                     </Link>

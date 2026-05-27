@@ -273,7 +273,7 @@ export default function AdminProductsPage() {
               handleCreateProduct
             }
             disabled={loading}
-            className="mt-8 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white font-semibold"
+            className="mt-8 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white font-semibold"
           >
             {loading
               ? "Creating..."

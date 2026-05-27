@@ -46,7 +46,7 @@ export default function LoginPage() {
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
-          "Something went wrong"
+        "Something went wrong"
       );
     } finally {
       setLoading(false);
@@ -92,12 +92,25 @@ export default function LoginPage() {
 
         <button
           disabled={loading}
-          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white font-semibold"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white font-semibold"
         >
           {loading
             ? "Logging in..."
             : "Login"}
         </button>
+
+        <p className="text-center text-sm text-gray-500">
+          Don&apos;t have an account?{" "}
+
+          <span
+            onClick={() =>
+              router.push("/register")
+            }
+            className="text-purple-500 hover:text-purple-400 cursor-pointer font-medium transition"
+          >
+            Create one
+          </span>
+        </p>
       </form>
     </section>
   );

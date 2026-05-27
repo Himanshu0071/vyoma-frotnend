@@ -108,7 +108,7 @@ export default function RegisterPage() {
 
         <button
           disabled={loading}
-          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white font-semibold"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white font-semibold"
         >
           {loading
             ? "Creating..."

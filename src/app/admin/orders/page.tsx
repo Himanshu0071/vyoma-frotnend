@@ -192,7 +192,7 @@ export default function AdminOrdersPage() {
                                 order._id
                               )
                             }
-                            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white text-sm"
+                            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white text-sm"
                           >
                             Mark Delivered
                           </button>

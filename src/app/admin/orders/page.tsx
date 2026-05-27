@@ -1,14 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import toast from "react-hot-toast";
 
 import {
   getAllOrders,
-
   markDelivered,
 } from "@/services/order.service";
+
+import {
+  Search,
+  Check,
+} from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] =
@@ -16,6 +31,15 @@ export default function AdminOrdersPage() {
 
   const [loading, setLoading] =
     useState(true);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [paymentFilter, setPaymentFilter] =
+    useState("ALL");
+
+  const [deliveryFilter, setDeliveryFilter] =
+    useState("ALL");
 
   /* =========================
      FETCH ORDERS
@@ -66,125 +90,270 @@ export default function AdminOrdersPage() {
       }
     };
 
+  /* =========================
+     FILTERED ORDERS
+  ========================= */
+
+  const filteredOrders =
+    useMemo(() => {
+      return orders.filter(
+        (order) => {
+          const matchesSearch =
+            order.user?.name
+              ?.toLowerCase()
+              .includes(
+                search.toLowerCase()
+              ) ||
+            order.user?.email
+              ?.toLowerCase()
+              .includes(
+                search.toLowerCase()
+              ) ||
+            order._id
+              ?.toLowerCase()
+              .includes(
+                search.toLowerCase()
+              );
+
+          const matchesPayment =
+            paymentFilter ===
+              "ALL" ||
+            (paymentFilter ===
+              "PAID" &&
+              order.isPaid) ||
+            (paymentFilter ===
+              "PENDING" &&
+              !order.isPaid);
+
+          const matchesDelivery =
+            deliveryFilter ===
+              "ALL" ||
+            (deliveryFilter ===
+              "DELIVERED" &&
+              order.isDelivered) ||
+            (deliveryFilter ===
+              "PENDING" &&
+              !order.isDelivered);
+
+          return (
+            matchesSearch &&
+            matchesPayment &&
+            matchesDelivery
+          );
+        }
+      );
+    }, [
+      orders,
+      search,
+      paymentFilter,
+      deliveryFilter,
+    ]);
+
   return (
-    <section className="py-24">
-      <div className="container-custom">
+    <div className="h-full flex flex-col gap-5 overflow-hidden">
+      {/* HEADER */}
+      <div>
+        <h1 className="text-2xl font-semibold">
+          Orders
+        </h1>
 
-        {/* Heading */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold">
-            Orders Dashboard
-          </h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Manage customer orders
+        </p>
+      </div>
 
-          <p className="text-gray-500 mt-4">
-            Manage customer orders
-          </p>
+      {/* FILTERS */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-wrap items-center gap-3">
+        {/* SEARCH */}
+        <div className="relative w-full md:w-[260px]">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <Input
+            placeholder="Search orders..."
+            value={search}
+            onChange={(e) =>
+              setSearch(
+                e.target.value
+              )
+            }
+            className="pl-10 h-10 bg-white/5 border-white/10 text-sm"
+          />
         </div>
 
-        {/* Loading */}
+        {/* PAYMENT */}
+        <select
+          value={paymentFilter}
+          onChange={(e) =>
+            setPaymentFilter(
+              e.target.value
+            )
+          }
+          className="h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm outline-none"
+        >
+          <option value="ALL">
+            All Payments
+          </option>
+
+          <option value="PAID">
+            Paid
+          </option>
+
+          <option value="PENDING">
+            Pending
+          </option>
+        </select>
+
+        {/* DELIVERY */}
+        <select
+          value={deliveryFilter}
+          onChange={(e) =>
+            setDeliveryFilter(
+              e.target.value
+            )
+          }
+          className="h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm outline-none"
+        >
+          <option value="ALL">
+            All Deliveries
+          </option>
+
+          <option value="DELIVERED">
+            Delivered
+          </option>
+
+          <option value="PENDING">
+            Pending
+          </option>
+        </select>
+      </div>
+
+      {/* TABLE */}
+      <div className="flex-1 min-h-0 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="text-center py-20">
-            Loading...
+          <div className="h-full flex items-center justify-center text-sm text-gray-400">
+            Loading orders...
           </div>
         ) : (
-          <div className="glass rounded-[32px] overflow-hidden overflow-x-auto">
-
-            <table className="w-full min-w-[1000px]">
-
-              <thead className="border-b border-gray-200 dark:border-white/10">
-
-                <tr className="text-left">
-
-                  <th className="p-6">
+          <div className="h-full overflow-auto">
+            <Table>
+              <TableHeader className="bg-white/[0.03] sticky top-0 z-10">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-gray-400 h-12 text-xs uppercase">
                     Customer
-                  </th>
+                  </TableHead>
 
-                  <th className="p-6">
-                    Total
-                  </th>
+                  <TableHead className="text-gray-400 text-xs uppercase">
+                    Order ID
+                  </TableHead>
 
-                  <th className="p-6">
-                    Paid
-                  </th>
+                  <TableHead className="text-gray-400 text-xs uppercase">
+                    Amount
+                  </TableHead>
 
-                  <th className="p-6">
-                    Delivered
-                  </th>
+                  <TableHead className="text-gray-400 text-xs uppercase">
+                    Payment
+                  </TableHead>
 
-                  <th className="p-6">
+                  <TableHead className="text-gray-400 text-xs uppercase">
+                    Delivery
+                  </TableHead>
+
+                  <TableHead className="text-gray-400 text-xs uppercase">
                     Date
-                  </th>
+                  </TableHead>
 
-                  <th className="p-6">
+                  <TableHead className="text-gray-400 text-xs uppercase">
                     Action
-                  </th>
-                </tr>
-              </thead>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
 
-              <tbody>
-                {orders.map(
+              <TableBody>
+                {filteredOrders.map(
                   (order) => (
-                    <tr
-                      key={order._id}
-                      className="border-b border-gray-200 dark:border-white/5"
+                    <TableRow
+                      key={
+                        order._id
+                      }
+                      className="border-white/5 hover:bg-white/[0.02]"
                     >
-                      <td className="p-6">
-
+                      {/* CUSTOMER */}
+                      <TableCell className="py-4">
                         <div>
-                          <p className="font-semibold">
+                          <p className="text-sm font-medium">
                             {
                               order.user
                                 ?.name
                             }
                           </p>
 
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs text-gray-400 mt-1">
                             {
                               order.user
                                 ?.email
                             }
                           </p>
                         </div>
-                      </td>
+                      </TableCell>
 
-                      <td className="p-6 font-semibold">
+                      {/* ORDER ID */}
+                      <TableCell className="text-xs text-gray-400">
+                        #
+                        {order._id.slice(
+                          -6
+                        )}
+                      </TableCell>
+
+                      {/* AMOUNT */}
+                      <TableCell className="text-sm font-medium">
                         ₹
                         {
                           order.totalPrice
                         }
-                      </td>
+                      </TableCell>
 
-                      <td className="p-6">
-                        {order.isPaid ? (
-                          <span className="text-green-500">
-                            Paid
-                          </span>
-                        ) : (
-                          <span className="text-red-500">
-                            Pending
-                          </span>
-                        )}
-                      </td>
+                      {/* PAYMENT */}
+                      <TableCell>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            order.isPaid
+                              ? "bg-green-500/10 text-green-400"
+                              : "bg-red-500/10 text-red-400"
+                          }`}
+                        >
+                          {order.isPaid
+                            ? "Paid"
+                            : "Pending"}
+                        </span>
+                      </TableCell>
 
-                      <td className="p-6">
-                        {order.isDelivered ? (
-                          <span className="text-green-500">
-                            Delivered
-                          </span>
-                        ) : (
-                          <span className="text-yellow-500">
-                            Processing
-                          </span>
-                        )}
-                      </td>
+                      {/* DELIVERY */}
+                      <TableCell>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            order.isDelivered
+                              ? "bg-green-500/10 text-green-400"
+                              : "bg-yellow-500/10 text-yellow-400"
+                          }`}
+                        >
+                          {order.isDelivered
+                            ? "Delivered"
+                            : "Pending"}
+                        </span>
+                      </TableCell>
 
-                      <td className="p-6">
+                      {/* DATE */}
+                      <TableCell className="text-sm text-gray-400">
                         {new Date(
                           order.createdAt
                         ).toLocaleDateString()}
-                      </td>
+                      </TableCell>
 
-                      <td className="p-6">
+                      {/* ACTION */}
+                      <TableCell>
                         {!order.isDelivered && (
                           <button
                             onClick={() =>
@@ -192,20 +361,22 @@ export default function AdminOrdersPage() {
                                 order._id
                               )
                             }
-                            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white text-sm"
+                            className="h-9 px-4 rounded-xl bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-white transition text-sm flex items-center gap-2"
                           >
-                            Mark Delivered
+                            <Check size={15} />
+
+                            Deliver
                           </button>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

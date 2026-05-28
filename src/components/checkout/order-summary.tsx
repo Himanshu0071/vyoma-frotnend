@@ -32,7 +32,7 @@ export default function OrderSummary() {
     (acc: number, item: any) =>
       acc +
       item.price *
-        item.quantity,
+      item.quantity,
     0
   );
 
@@ -100,7 +100,7 @@ export default function OrderSummary() {
         toast.error(
           error?.response?.data
             ?.message ||
-            "Failed to place order"
+          "Failed to place order"
         );
       } finally {
         setLoading(false);
@@ -136,10 +136,17 @@ export default function OrderSummary() {
                 {item.title}
               </h3>
 
-              <p className="text-sm text-gray-500">
-                Qty:{" "}
-                {item.quantity}
-              </p>
+              <div className="space-y-1 mt-1">
+                <p className="text-sm text-gray-500">
+                  Qty: {item.quantity}
+                </p>
+
+                {item.selectedSize && (
+                  <p className="text-sm text-purple-400 font-medium">
+                    Size: {item.selectedSize}
+                  </p>
+                )}
+              </div>
 
               <p className="font-semibold mt-1">
                 $

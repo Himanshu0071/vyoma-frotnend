@@ -20,6 +20,8 @@ export default function ProductPage() {
 
     const [product, setProduct] =
         useState<Product | null>(null);
+    const [selectedSize, setSelectedSize] =
+        useState("");
 
     const [loading, setLoading] =
         useState(true);
@@ -57,6 +59,33 @@ export default function ProductPage() {
             </div>
         );
     }
+    const handleAddToCart = () => {
+
+        /* SIZE VALIDATION */
+        if (
+            product.sizes?.length > 0 &&
+            !selectedSize
+        ) {
+            return toast.error(
+                "Please select a size"
+            );
+        }
+
+        addToCart({
+            _id: product._id,
+            title: product.title,
+            price: product.price,
+            image:
+                product.images?.[0] ||
+                "/placeholder.png",
+            selectedSize,
+            quantity: 1,
+        });
+
+        toast.success(
+            "Added to cart"
+        );
+    };
     return (
         <section className="py-24">
             <div className="container-custom grid lg:grid-cols-2 gap-16">
@@ -94,23 +123,44 @@ export default function ProductPage() {
                     </div>
 
                     {/* Sizes */}
-                    <div>
-                        <h3 className="font-semibold mb-4">
-                            Sizes
-                        </h3>
+                  <div className="mt-8">
+  <h3 className="text-sm font-semibold mb-4">
+    Select Size
+  </h3>
 
-                        <div className="flex gap-4">
-                            {product.sizes.map((size) => (
-                                <button
-                                    key={size}
-                                    className="w-14 h-14 rounded-full border border-gray-300 dark:border-white/10"
-                                >
-                                    {size}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+  <div className="flex flex-wrap gap-3">
+    {product.sizes?.map(
+      (size: string) => (
+        <button
+          key={size}
+          onClick={() =>
+            setSelectedSize(
+              size
+            )
+          }
+          className={`w-12 h-12 rounded-full border text-sm font-semibold transition-all duration-300 flex items-center justify-center ${
+            selectedSize ===
+            size
+              ? "bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white border-transparent scale-110 shadow-lg shadow-purple-500/30"
+              : "border-gray-300 dark:border-white/10 text-black dark:text-white hover:border-purple-400 hover:scale-105"
+          }`}
+        >
+          {size}
+        </button>
+      )
+    )}
+  </div>
 
+  {/* SELECTED SIZE TEXT */}
+  {selectedSize && (
+    <p className="text-sm text-purple-400 mt-4">
+      Selected Size:{" "}
+      <span className="font-semibold text-white">
+        {selectedSize}
+      </span>
+    </p>
+  )}
+</div>
                     {/* Colors */}
                     <div>
                         <h3 className="font-semibold mb-4">
@@ -131,17 +181,7 @@ export default function ProductPage() {
 
                     {/* Button */}
                     <button
-                       onClick={() => {
-                        addToCart({
-                          _id: product._id,
-                          title: product.title,
-                          price: product.price,
-                          image: product.images[0],
-                          quantity: 1,
-                        });
-                      
-                        toast.success("Added to cart");
-                      }}
+                        onClick={handleAddToCart}
                         className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white font-semibold text-lg"
                     >
                         Add To Cart

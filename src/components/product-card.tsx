@@ -98,11 +98,10 @@ export default function ProductCard({
             >
               <FontAwesomeIcon
                 icon={faHeart}
-                className={`transition ${
-                  liked
+                className={`transition ${liked
                     ? "text-red-500"
                     : "text-gray-800 dark:text-white"
-                }`}
+                  }`}
               />
             </button>
           )}
@@ -115,8 +114,7 @@ export default function ProductCard({
             alt={product.title}
             width={500}
             height={600}
-            className="w-full h-[420px] object-cover group-hover:scale-105 transition duration-700 relative z-0"
-          />
+            className="w-full h-[320px] object-cover group-hover:scale-105 transition duration-700 relative z-0" />
         </div>
 
         {/* CONTENT */}
@@ -134,11 +132,11 @@ export default function ProductCard({
             </span>
           </div>
 
-          <h3 className="text-xl font-semibold mb-3">
+          <h3 className="text-xl font-semibold mb-3 truncate">
             {product.title}
           </h3>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 truncate">
             {
               product.description
             }

@@ -35,7 +35,7 @@ export default function FeaturedProducts() {
   console.log(products, "data")
 
   return (
-    <section className="py-24">
+    <section className="py-14">
       <div className="container-custom">
 
         {/* Heading */}
@@ -57,7 +57,7 @@ export default function FeaturedProducts() {
             Loading products...
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {products.map((product) => (
               <ProductCard
                 key={product._id}

@@ -7,358 +7,593 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 
 import {
-  createProduct,
-  deleteProduct,
+    Trash2,
+    Plus,
+} from "lucide-react";
+
+import {
+    createProduct,
+    deleteProduct,
 } from "@/services/admin.service";
 
 import { getProducts } from "@/services/product.service";
 
+import { Product } from "@/types/product";
+
+import { Input } from "@/components/ui/input";
+
+import { Checkbox } from "@/components/ui/checkbox";
+
+
+
 import {
-  Trash2,
-  Plus,
-} from "lucide-react";
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+/* =========================
+   TYPES
+========================= */
+
+type ProductFormData = {
+    title: string;
+    description: string;
+    price: string;
+    category: string;
+    image: string;
+    brand: string;
+    stock: string;
+    sizes: string;
+    gender: string;
+    discount: string;
+    featured: boolean;
+};
+
+const initialFormData: ProductFormData =
+{
+    title: "",
+    description: "",
+    price: "",
+    category: "",
+    image: "",
+    brand: "",
+    stock: "",
+    sizes: "",
+    gender: "",
+    discount: "",
+    featured: false,
+};
 
 export default function AdminProductsPage() {
-  const [products, setProducts] =
-    useState<any[]>([]);
+    const [category, setCategory] =
+        useState("all");
 
-  const [loading, setLoading] =
-    useState(false);
+    /* STATES */
+    const [products, setProducts] =
+        useState<Product[]>([]);
 
-  const [formData, setFormData] =
-    useState({
-      title: "",
-      description: "",
-      price: "",
-      category: "",
-      image: "",
-    });
+    const [loading, setLoading] =
+        useState<boolean>(false);
 
-  /* =========================
-     FETCH PRODUCTS
-  ========================= */
-
-  const fetchProducts =
-    async () => {
-      try {
-        const data =
-          await getProducts();
-
-        setProducts(data);
-      } catch (error) {
-        console.log(error);
-
-        toast.error(
-          "Failed to fetch products"
-        );
-      }
-    };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  /* =========================
-     HANDLE CHANGE
-  ========================= */
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement |
-      HTMLTextAreaElement
-    >
-  ) => {
-    setFormData({
-      ...formData,
-
-      [e.target.name]:
-        e.target.value,
-    });
-  };
-
-  /* =========================
-     CREATE PRODUCT
-  ========================= */
-
-  const handleSubmit =
-    async (
-      e: React.FormEvent
-    ) => {
-      e.preventDefault();
-
-      try {
-        setLoading(true);
-
-        await createProduct({
-          ...formData,
-
-          price: Number(
-            formData.price
-          ),
-
-          images: [
-            formData.image,
-          ],
-        });
-
-        toast.success(
-          "Product created"
+    const [formData, setFormData] =
+        useState<ProductFormData>(
+            initialFormData
         );
 
-        setFormData({
-          title: "",
-          description: "",
-          price: "",
-          category: "",
-          image: "",
-        });
+    /* =========================
+       FETCH PRODUCTS
+    ========================= */
 
+    const fetchProducts =
+        async (): Promise<void> => {
+            try {
+                const data =
+                    await getProducts();
+
+                setProducts(data);
+            } catch (error) {
+                console.log(error);
+
+                toast.error(
+                    "Failed to fetch products"
+                );
+            }
+        };
+
+    useEffect(() => {
         fetchProducts();
-      } catch (error) {
-        console.log(error);
+    }, []);
 
-        toast.error(
-          "Failed to create product"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    /* =========================
+       HANDLE INPUT CHANGE
+    ========================= */
 
-  /* =========================
-     DELETE PRODUCT
-  ========================= */
-
-  const handleDelete =
-    async (id: string) => {
-      try {
-        await deleteProduct(
-          id
-        );
-
-        toast.success(
-          "Product deleted"
-        );
-
-        fetchProducts();
-      } catch (error) {
-        console.log(error);
-
-        toast.error(
-          "Delete failed"
-        );
-      }
-    };
-
-  return (
-    <div className=" flex flex-col gap-6 overflow-auto">
-      {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Products
-        </h1>
-
-        <p className="text-sm text-gray-400 mt-1">
-          Manage your store products
-        </p>
-      </div>
-
-      {/* CREATE PRODUCT */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-5">
-          <Plus size={18} />
-
-          <h2 className="text-lg font-semibold">
-            Add Product
-          </h2>
-        </div>
-
-        <form
-          onSubmit={
-            handleSubmit
-          }
-          className="grid md:grid-cols-2 gap-4"
+    const handleChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement |
+            HTMLTextAreaElement
         >
-          <input
-            type="text"
-            name="title"
-            placeholder="Product Title"
-            value={
-              formData.title
+    ): void => {
+        const {
+            name,
+            value,
+        } = e.target;
+
+        setFormData(
+            (
+                prev
+            ): ProductFormData => ({
+                ...prev,
+
+                [name]:
+                    value,
+            })
+        );
+    };
+
+    /* =========================
+       CREATE PRODUCT
+    ========================= */
+
+    const handleSubmit =
+        async (
+            e: React.FormEvent<HTMLFormElement>
+        ): Promise<void> => {
+            e.preventDefault();
+
+            try {
+                setLoading(true);
+
+                await createProduct({
+                    ...formData,
+
+                    price: Number(
+                        formData.price
+                    ),
+
+                    stock: Number(
+                        formData.stock
+                    ),
+
+                    discount:
+                        Number(
+                            formData.discount
+                        ),
+
+                    images: [
+                        formData.image,
+                    ],
+
+                    sizes:
+                        formData.sizes
+                            .split(",")
+                            .map((size) =>
+                                size.trim()
+                            ),
+                });
+
+                toast.success(
+                    "Product created"
+                );
+
+                setFormData(
+                    initialFormData
+                );
+
+                fetchProducts();
+            } catch (error) {
+                console.log(error);
+
+                toast.error(
+                    "Failed to create product"
+                );
+            } finally {
+                setLoading(false);
             }
-            onChange={
-              handleChange
+        };
+
+    /* =========================
+       DELETE PRODUCT
+    ========================= */
+
+    const handleDelete =
+        async (
+            id: string
+        ): Promise<void> => {
+            try {
+                await deleteProduct(
+                    id
+                );
+
+                toast.success(
+                    "Product deleted"
+                );
+
+                fetchProducts();
+            } catch (error) {
+                console.log(error);
+
+                toast.error(
+                    "Delete failed"
+                );
             }
-            className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
-            required
-          />
+        };
 
-          <input
-            type="text"
-            name="category"
-            placeholder="Category"
-            value={
-              formData.category
-            }
-            onChange={
-              handleChange
-            }
-            className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
-            required
-          />
+    useEffect(() => {
+        fetchProducts();
+    }, [category]);
 
-          <input
-            type="number"
-            name="price"
-            placeholder="Price"
-            value={
-              formData.price
-            }
-            onChange={
-              handleChange
-            }
-            className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
-            required
-          />
 
-          <input
-            type="text"
-            name="image"
-            placeholder="Image URL"
-            value={
-              formData.image
-            }
-            onChange={
-              handleChange
-            }
-            className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
-            required
-          />
 
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={
-              formData.description
-            }
-            onChange={
-              handleChange
-            }
-            className="md:col-span-2 min-h-[100px] p-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
-            required
-          />
+    return (
+        <div className=" flex flex-col gap-6 overflow-auto">
+            {/* HEADER */}
+            <div>
+                <h1 className="text-2xl font-semibold">
+                    Products
+                </h1>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="h-11 rounded-xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-sm font-medium"
-          >
-            {loading
-              ? "Creating..."
-              : "Create Product"}
-          </button>
-        </form>
-      </div>
+                <p className="text-sm text-gray-400 mt-1">
+                    Manage your store products
+                </p>
+            </div>
 
-      {/* PRODUCT TABLE */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-auto flex-1">
-        {/* TABLE HEADER */}
-        <div className="grid grid-cols-[80px_1.5fr_1fr_120px_100px] gap-4 px-5 py-4 border-b border-white/10 text-xs uppercase tracking-wider text-gray-400">
-          <span>
-            Image
-          </span>
+            {/* CREATE PRODUCT */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-5">
+                    <Plus size={18} />
 
-          <span>
-            Product
-          </span>
-
-          <span>
-            Category
-          </span>
-
-          <span>
-            Price
-          </span>
-
-          <span>
-            Action
-          </span>
-        </div>
-
-        {/* PRODUCTS */}
-        <div className="divide-y divide-white/5">
-          {products.map(
-            (product) => (
-              <div
-                key={
-                  product._id
-                }
-                className="grid grid-cols-[80px_1.5fr_1fr_120px_100px] gap-4 items-center px-5 py-4 hover:bg-white/[0.03] transition"
-              >
-                {/* IMAGE */}
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden">
-                  <Image
-                    src={
-                      product
-                        .images?.[0] ||
-                      "/placeholder.png"
-                    }
-                    alt={
-                      product.title
-                    }
-                    fill
-                    className="object-cover"
-                  />
+                    <h2 className="text-lg font-semibold">
+                        Add Product
+                    </h2>
                 </div>
 
-                {/* TITLE */}
-                <div>
-                  <h3 className="text-sm font-medium line-clamp-1">
-                    {
-                      product.title
+                <form
+                    onSubmit={
+                        handleSubmit
                     }
-                  </h3>
-
-                  <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                    {
-                      product.description
-                    }
-                  </p>
-                </div>
-
-                {/* CATEGORY */}
-                <div className="text-sm text-gray-300">
-                  {
-                    product.category
-                  }
-                </div>
-
-                {/* PRICE */}
-                <div className="text-sm font-medium">
-                  ₹
-                  {
-                    product.price
-                  }
-                </div>
-
-                {/* DELETE */}
-                <button
-                  onClick={() =>
-                    handleDelete(
-                      product._id
-                    )
-                  }
-                  className="w-9 h-9 rounded-lg bg-red-500/10 hover:bg-red-500 transition flex items-center justify-center text-red-400"
+                    className="grid md:grid-cols-2 w-full gap-4"
                 >
-                  <Trash2
-                    size={16}
-                  />
-                </button>
-              </div>
-            )
-          )}
+                    <input
+                        type="text"
+                        name="title"
+                        placeholder="Product Title"
+                        value={
+                            formData.title
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
+                        required
+                    />
+
+                    <Select
+                        value={category}
+                        onValueChange={setCategory}
+                    >
+                        <SelectTrigger  className="w-full !h-11 bg-white/5 border-white/10 text-sm">
+                            <SelectValue placeholder="Collections" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            <SelectItem value="all">
+                                Select Category
+                            </SelectItem>
+
+                            <SelectItem value="tshirts">
+                                T-Shirts
+                            </SelectItem>
+
+                            <SelectItem value="shirts">
+                                Shirts
+                            </SelectItem>
+
+                            <SelectItem value="vest">
+                                Vest
+                            </SelectItem>
+
+                            <SelectItem value="kurta">
+                                Kurta
+                            </SelectItem>
+
+                            <SelectItem value="jeans">
+                                Jeans
+                            </SelectItem>
+
+                            <SelectItem value="pant">
+                                Pant
+                            </SelectItem>
+
+                            <SelectItem value="shoes">
+                                Shoes
+                            </SelectItem>
+
+                            <SelectItem value="trousers">
+                                Trousers
+                            </SelectItem>
+
+                            <SelectItem value="cargo">
+                                Cargo
+                            </SelectItem>
+
+                            <SelectItem value="joggers">
+                                Joggers
+                            </SelectItem>
+
+                            <SelectItem value="shorts">
+                                Shorts
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+
+
+                    <Select
+                        value={formData.gender}
+                        onValueChange={(
+                            value: string
+                        ) =>
+                            setFormData({
+                                ...formData,
+                                gender: value,
+                            })
+                        }
+                    >
+                        <SelectTrigger className="w-full !h-11 bg-white/5 border-white/10 text-sm">
+                            <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+
+                        <SelectContent position="item-aligned"
+                            className="min-w-[var(--radix-select-trigger-width)]"
+                        >
+                            <SelectGroup>
+                                <SelectItem value="men">
+                                    Men
+                                </SelectItem>
+
+                                <SelectItem value="women">
+                                    Women
+                                </SelectItem>
+
+                                <SelectItem value="unisex">
+                                    Unisex
+                                </SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+
+                    <Input
+                        type="text"
+                        placeholder="Brand"
+                        value={formData.brand}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                brand: e.target.value,
+                            })
+                        }
+                        className="h-11 bg-white/5 border-white/10 text-sm"
+                    />
+
+                    <Input
+                        type="number"
+                        placeholder="Stock Quantity"
+                        value={formData.stock}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                stock: e.target.value,
+                            })
+                        }
+                        className="h-11 bg-white/5 border-white/10 text-sm"
+                    />
+
+                    <Input
+                        type="text"
+                        placeholder="Sizes (S,M,L,XL)"
+                        value={formData.sizes}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                sizes: e.target.value,
+                            })
+                        }
+                        className="h-11 bg-white/5 border-white/10 text-sm"
+                    />
+
+                    <Input
+                        type="number"
+                        placeholder="Discount %"
+                        value={formData.discount}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                discount:
+                                    e.target.value,
+                            })
+                        }
+                        className="h-11 bg-white/5 border-white/10 text-sm"
+                    />
+
+                    <div className="flex items-center gap-3">
+                        <Checkbox
+                            checked={
+                                formData.featured
+                            }
+                            onCheckedChange={(
+                                checked
+                            ) =>
+                                setFormData({
+                                    ...formData,
+                                    featured:
+                                        checked as boolean,
+                                })
+                            }
+                        />
+
+                        <label className="text-sm text-gray-300">
+                            Featured Product
+                        </label>
+                    </div>
+
+                    <input
+                        type="number"
+                        name="price"
+                        placeholder="Price"
+                        value={
+                            formData.price
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
+                        required
+                    />
+
+                    <input
+                        type="text"
+                        name="image"
+                        placeholder="Image URL"
+                        value={
+                            formData.image
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
+                        required
+                    />
+
+                    <textarea
+                        name="description"
+                        placeholder="Description"
+                        value={
+                            formData.description
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="md:col-span-2 min-h-[100px] p-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
+                        required
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="h-11 rounded-xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-sm font-medium"
+                    >
+                        {loading
+                            ? "Creating..."
+                            : "Create Product"}
+                    </button>
+                </form>
+            </div>
+
+            {/* PRODUCT TABLE */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-auto flex-1">
+                {/* TABLE HEADER */}
+                <div className="grid grid-cols-[80px_1.5fr_1fr_120px_100px] gap-4 px-5 py-4 border-b border-white/10 text-xs uppercase tracking-wider text-gray-400">
+                    <span>
+                        Image
+                    </span>
+
+                    <span>
+                        Product
+                    </span>
+
+                    <span>
+                        Category
+                    </span>
+
+                    <span>
+                        Price
+                    </span>
+
+                    <span>
+                        Action
+                    </span>
+                </div>
+
+                {/* PRODUCTS */}
+                <div className="divide-y divide-white/5">
+                    {products.map(
+                        (product) => (
+                            <div
+                                key={
+                                    product._id
+                                }
+                                className="grid grid-cols-[80px_1.5fr_1fr_120px_100px] gap-4 items-center px-5 py-4 hover:bg-white/[0.03] transition"
+                            >
+                                {/* IMAGE */}
+                                <div className="relative w-12 h-12 rounded-lg overflow-x-hidden">
+                                    <Image
+                                        src={
+                                            product
+                                                .images?.[0] ||
+                                            "/placeholder.png"
+                                        }
+                                        alt={
+                                            product.title
+                                        }
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+
+                                {/* TITLE */}
+                                <div>
+                                    <h3 className="text-sm font-medium line-clamp-1">
+                                        {
+                                            product.title
+                                        }
+                                    </h3>
+
+                                    <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                                        {
+                                            product.description
+                                        }
+                                    </p>
+                                </div>
+
+                                {/* CATEGORY */}
+                                <div className="text-sm text-gray-300">
+                                    {
+                                        product.category
+                                    }
+                                </div>
+
+                                {/* PRICE */}
+                                <div className="text-sm font-medium">
+                                    ₹
+                                    {
+                                        product.price
+                                    }
+                                </div>
+
+                                {/* DELETE */}
+                                <button
+                                    onClick={() =>
+                                        handleDelete(
+                                            product._id
+                                        )
+                                    }
+                                    className="w-9 h-9 rounded-lg bg-red-500/10 hover:bg-red-500 transition flex items-center justify-center text-red-400"
+                                >
+                                    <Trash2
+                                        size={16}
+                                    />
+                                </button>
+                            </div>
+                        )
+                    )}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

@@ -41,23 +41,25 @@ export default function CartDrawer({
             <div
                 onClick={() => setOpen(false)}
                 className={`fixed inset-0 bg-black/40 z-40 transition duration-300 ${open
-                        ? "opacity-100 visible"
-                        : "opacity-0 invisible"
+                    ? "opacity-100 visible"
+                    : "opacity-0 invisible"
                     }`}
             />
 
             {/* Drawer */}
             <div
-                className={`fixed top-0 right-0 h-full w-full sm:w-[450px] bg-white dark:bg-[#0D1324] z-50 shadow-2xl transition duration-300 flex flex-col ${open
+                className={`fixed top-0 right-0 h-full 
+    w-[84%] sm:w-[360px] md:w-[380px]
+    bg-white dark:bg-[#0D1324] z-50 shadow-2xl 
+    transition duration-300 flex flex-col ${open
                         ? "translate-x-0"
                         : "translate-x-full"
                     }`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-white/10">
-                    <h2 className="text-2xl font-bold">
-                        Your Cart
-                    </h2>
+                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200 dark:border-white/10">                    <h2 className="text-2xl font-bold">
+                    Your Cart
+                </h2>
 
                     <button onClick={() => setOpen(false)}>
                         <FontAwesomeIcon
@@ -68,8 +70,7 @@ export default function CartDrawer({
                 </div>
 
                 {/* Cart Items */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
                     {cart.length === 0 ? (
                         <p className="text-center text-gray-500">
                             Your cart is empty
@@ -78,20 +79,27 @@ export default function CartDrawer({
                         cart.map((item) => (
                             <div
                                 key={item._id}
-                                className="flex gap-4"
-                            >
+                                className="flex gap-3"                            >
                                 <Image
                                     src={item.image}
                                     alt={item.title}
                                     width={100}
                                     height={100}
-                                    className="w-24 h-24 object-cover rounded-2xl"
+                                    className="w-20 h-20 object-cover rounded-xl"
                                 />
 
                                 <div className="flex-1 space-y-2">
                                     <h3 className="font-semibold">
                                         {item.title}
                                     </h3>
+
+
+                                    {item.selectedSize && (
+                                        <p className="text-sm text-purple-400 font-medium">
+                                            Size: {item.selectedSize}
+                                        </p>
+                                    )}
+
 
                                     <p className="gradient-text font-bold">
                                         ${item.price}
@@ -133,7 +141,8 @@ export default function CartDrawer({
                                         <button
                                             onClick={() =>
                                                 removeFromCart(
-                                                    item._id
+                                                    item._id,
+                                                    item.selectedSize
                                                 )
                                             }
                                             className="ml-auto text-red-500"
@@ -150,8 +159,7 @@ export default function CartDrawer({
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-200 dark:border-white/10 space-y-5">
-
+                <div className="p-4 border-t border-gray-200 dark:border-white/10 space-y-4">
                     <div className="flex items-center justify-between text-xl font-bold">
                         <span>Subtotal</span>
 
@@ -161,7 +169,7 @@ export default function CartDrawer({
                     </div>
 
                     <Link
-                      onClick={() => setOpen(false)}
+                        onClick={() => setOpen(false)}
                         href="/checkout"
                         className="block text-center w-full py-4 rounded-2xl bg-gradient-to-r from-[#1356d0] via-[#9A1951] to-[#FA5303] text-white font-semibold"
                     >

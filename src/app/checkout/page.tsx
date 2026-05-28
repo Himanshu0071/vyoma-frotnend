@@ -53,7 +53,7 @@ export default function CheckoutPage() {
     (acc, item) =>
       acc +
       item.price *
-        item.quantity,
+      item.quantity,
     0
   );
 
@@ -206,11 +206,11 @@ export default function CheckoutPage() {
     };
 
   return (
-    <section className="py-24">
+    <section className="py-4">
       <div className="container-custom">
         {/* Heading */}
         <div className="mb-12">
-          <h1 className="text-5xl font-bold">
+          <h1 className="text-4xl font-bold">
             Checkout
           </h1>
 
@@ -232,41 +232,41 @@ export default function CheckoutPage() {
 
               {/* ADD NEW ADDRESS */}
               {/* HEADER */}
-<div className="flex items-center justify-between mb-6">
-  <div>
-    <h2 className="text-2xl font-bold">
-          Add New Address
-    </h2>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    Add New Address
+                  </h2>
 
-    <p className="text-gray-500 mt-1 text-sm">
-      Select a delivery address
-    </p>
-  </div>
+                  <p className="text-gray-500 mt-1 text-sm">
+                    Select a delivery address
+                  </p>
+                </div>
 
-  {/* ADD ADDRESS */}
-  <Dialog>
-    <DialogTrigger asChild>
-      <button className="h-11 px-5 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white text-sm font-medium hover:opacity-90 transition">
-        Add New
-      </button>
-    </DialogTrigger>
+                {/* ADD ADDRESS */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="h-11 px-5 rounded-2xl bg-gradient-to-r from-[#7C8CFF] via-[#C084FC] to-[#FFB38A] text-white text-sm font-medium hover:opacity-90 transition">
+                      Add New
+                    </button>
+                  </DialogTrigger>
 
-    {/* MODAL */}
-    <DialogContent className="bg-[#111827] border border-white/10 text-white rounded-3xl max-w-2xl">
-      <DialogHeader>
-        <DialogTitle className="text-2xl font-bold">
-          Add New Address
-        </DialogTitle>
-      </DialogHeader>
+                  {/* MODAL */}
+                  <DialogContent className="bg-[#111827] border border-white/10 text-white rounded-3xl max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold">
+                        Add New Address
+                      </DialogTitle>
+                    </DialogHeader>
 
-      {/* FORM */}
-      <div className="mt-4">
-        <AddressForm />
-      </div>
-    </DialogContent>
-  </Dialog>
-</div>
-              
+                    {/* FORM */}
+                    <div className="mt-4">
+                      <AddressForm />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
 
               {/* CART ITEMS */}
               <div className="space-y-6">
@@ -297,7 +297,13 @@ export default function CheckoutPage() {
                             item.title
                           }
                         </h2>
-
+                        <div className="space-y-1 mt-1">
+                          {item.selectedSize && (
+                            <p className="text-sm text-purple-400 font-medium">
+                              Size: {item.selectedSize}
+                            </p>
+                          )}
+                        </div>
                         <p className="text-gray-500 mt-2">
                           ₹
                           {
@@ -339,7 +345,8 @@ export default function CheckoutPage() {
                         <button
                           onClick={() =>
                             removeFromCart(
-                              item._id
+                              item._id,
+                              item.selectedSize
                             )
                           }
                           className="ml-auto text-red-500"

@@ -2,6 +2,10 @@ import { create } from "zustand";
 
 import { persist } from "zustand/middleware";
 
+/* =========================
+   TYPES
+========================= */
+
 interface CartItem {
   _id: string;
 
@@ -12,21 +16,38 @@ interface CartItem {
   image: string;
 
   quantity: number;
+
+  selectedSize?: string;
 }
 
 interface CartStore {
   cart: CartItem[];
 
-  addToCart: (item: CartItem) => void;
+  addToCart: (
+    item: CartItem
+  ) => void;
 
-  removeFromCart: (id: string) => void;
+  removeFromCart: (
+    id: string,
+    selectedSize?: string
+  ) => void;
 
-  increaseQuantity: (id: string) => void;
+  increaseQuantity: (
+    id: string,
+    selectedSize?: string
+  ) => void;
 
-  decreaseQuantity: (id: string) => void;
+  decreaseQuantity: (
+    id: string,
+    selectedSize?: string
+  ) => void;
 
   clearCart: () => void;
 }
+
+/* =========================
+   STORE
+========================= */
 
 export const useCartStore =
   create<CartStore>()(
@@ -34,76 +55,135 @@ export const useCartStore =
       (set) => ({
         cart: [],
 
+        /* =========================
+           ADD TO CART
+        ========================= */
+
         addToCart: (item) =>
           set((state) => {
             const existingItem =
               state.cart.find(
                 (cartItem) =>
-                  cartItem._id === item._id
+                  cartItem._id ===
+                    item._id &&
+                  cartItem.selectedSize ===
+                    item.selectedSize
               );
 
-            // If item already exists
+            /* ITEM EXISTS */
             if (existingItem) {
               return {
                 cart: state.cart.map(
                   (cartItem) =>
-                    cartItem._id === item._id
+                    cartItem._id ===
+                      item._id &&
+                    cartItem.selectedSize ===
+                      item.selectedSize
                       ? {
                           ...cartItem,
+
                           quantity:
-                            cartItem.quantity + 1,
+                            cartItem.quantity +
+                            1,
                         }
                       : cartItem
                 ),
               };
             }
 
-            // Add new item
+            /* NEW ITEM */
             return {
               cart: [
                 ...state.cart,
+
                 {
                   ...item,
+
                   quantity: 1,
                 },
               ],
             };
           }),
 
-        removeFromCart: (id) =>
+        /* =========================
+           REMOVE FROM CART
+        ========================= */
+
+        removeFromCart: (
+          id,
+          selectedSize
+        ) =>
           set((state) => ({
-            cart: state.cart.filter(
-              (item) => item._id !== id
+            cart:
+              state.cart.filter(
+                (item) =>
+                  !(
+                    item._id ===
+                      id &&
+                    item.selectedSize ===
+                      selectedSize
+                  )
+              ),
+          })),
+
+        /* =========================
+           INCREASE QUANTITY
+        ========================= */
+
+        increaseQuantity: (
+          id,
+          selectedSize
+        ) =>
+          set((state) => ({
+            cart: state.cart.map(
+              (item) =>
+                item._id ===
+                  id &&
+                item.selectedSize ===
+                  selectedSize
+                  ? {
+                      ...item,
+
+                      quantity:
+                        item.quantity +
+                        1,
+                    }
+                  : item
             ),
           })),
 
-        increaseQuantity: (id) =>
+        /* =========================
+           DECREASE QUANTITY
+        ========================= */
+
+        decreaseQuantity: (
+          id,
+          selectedSize
+        ) =>
           set((state) => ({
-            cart: state.cart.map((item) =>
-              item._id === id
-                ? {
-                    ...item,
-                    quantity:
-                      item.quantity + 1,
-                  }
-                : item
+            cart: state.cart.map(
+              (item) =>
+                item._id ===
+                  id &&
+                item.selectedSize ===
+                  selectedSize
+                  ? {
+                      ...item,
+
+                      quantity:
+                        item.quantity >
+                        1
+                          ? item.quantity -
+                            1
+                          : 1,
+                    }
+                  : item
             ),
           })),
 
-        decreaseQuantity: (id) =>
-          set((state) => ({
-            cart: state.cart.map((item) =>
-              item._id === id
-                ? {
-                    ...item,
-                    quantity:
-                      item.quantity > 1
-                        ? item.quantity - 1
-                        : 1,
-                  }
-                : item
-            ),
-          })),
+        /* =========================
+           CLEAR CART
+        ========================= */
 
         clearCart: () =>
           set({

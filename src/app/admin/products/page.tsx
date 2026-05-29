@@ -35,23 +35,30 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Label } from "@/components/ui/label";
 
 /* =========================
    TYPES
 ========================= */
+
 
 type ProductFormData = {
     title: string;
     description: string;
     price: string;
     category: string;
-    image: string;
+    // images: [];
     brand: string;
-    stock: string;
-    sizes: string;
+    // stock: string;
+    // sizes: string;
     gender: string;
     discount: string;
     featured: boolean;
+};
+type VariantForm = {
+    color: string;
+    stock: string;
+    images: File[];
 };
 
 const initialFormData: ProductFormData =
@@ -60,18 +67,36 @@ const initialFormData: ProductFormData =
     description: "",
     price: "",
     category: "",
-    image: "",
+    // images: [],
     brand: "",
-    stock: "",
-    sizes: "",
+    // stock: "",
+    // sizes: "",
     gender: "",
     discount: "",
     featured: false,
 };
 
+
 export default function AdminProductsPage() {
     const [category, setCategory] =
         useState("all");
+
+
+    const [variants, setVariants] =
+        useState<VariantForm[]>([
+            {
+                color: "",
+                stock: "",
+                images: [],
+            },
+        ]);
+
+    // const [selectedFiles,
+    //     setSelectedFiles] =
+    //     useState<File[]>([]);
+
+    const [selectedSizes, setSelectedSizes] =
+        useState<string[]>([]);
 
     /* STATES */
     const [products, setProducts] =
@@ -109,6 +134,7 @@ export default function AdminProductsPage() {
         fetchProducts();
     }, []);
 
+
     /* =========================
        HANDLE INPUT CHANGE
     ========================= */
@@ -140,62 +166,131 @@ export default function AdminProductsPage() {
        CREATE PRODUCT
     ========================= */
 
-    const handleSubmit =
-        async (
-            e: React.FormEvent<HTMLFormElement>
-        ): Promise<void> => {
-            e.preventDefault();
+    const handleSubmit = async (
+        e: React.FormEvent<HTMLFormElement>
+    ): Promise<void> => {
+        e.preventDefault();
 
-            try {
-                setLoading(true);
+        try {
+            setLoading(true);
 
-                await createProduct({
-                    ...formData,
+            const payload =
+                new FormData();
 
-                    price: Number(
-                        formData.price
-                    ),
+            payload.append(
+                "title",
+                formData.title
+            );
 
-                    stock: Number(
-                        formData.stock
-                    ),
+            payload.append(
+                "description",
+                formData.description
+            );
 
-                    discount:
-                        Number(
-                            formData.discount
-                        ),
+            payload.append(
+                "price",
+                formData.price
+            );
 
-                    images: [
-                        formData.image,
-                    ],
+            payload.append(
+                "category",
+                formData.category
+            );
 
-                    sizes:
-                        formData.sizes
-                            .split(",")
-                            .map((size) =>
-                                size.trim()
-                            ),
-                });
+            payload.append(
+                "brand",
+                formData.brand
+            );
 
-                toast.success(
-                    "Product created"
+            payload.append(
+                "gender",
+                formData.gender
+            );
+
+            payload.append(
+                "discount",
+                formData.discount
+            );
+
+            payload.append(
+                "featured",
+                String(formData.featured)
+            );
+
+            payload.append(
+                "sizes",
+                JSON.stringify(
+                    selectedSizes
+                )
+            );
+
+            const variantData =
+                variants.map(
+                    ({
+                        color,
+                        stock,
+                    }) => ({
+                        color,
+                        stock,
+                    })
                 );
 
-                setFormData(
-                    initialFormData
-                );
+            payload.append(
+                "variants",
+                JSON.stringify(
+                    variantData
+                )
+            );
 
-                fetchProducts();
-            } catch (error) {
-                console.log(error);
+            variants.forEach(
+                (
+                    variant,
+                    variantIndex
+                ) => {
+                    variant.images.forEach(
+                        (file) => {
+                            payload.append(
+                                `variantImages_${variantIndex}`,
+                                file
+                            );
+                        }
+                    );
+                }
+            );
 
-                toast.error(
-                    "Failed to create product"
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
+            await createProduct(
+                payload
+            );
+
+            toast.success(
+                "Product created"
+            );
+
+            setFormData(
+                initialFormData
+            );
+
+            setSelectedSizes([]);
+
+            setVariants([
+                {
+                    color: "",
+                    stock: "",
+                    images: [],
+                },
+            ]);
+
+            fetchProducts();
+        } catch (error) {
+            console.log(error);
+
+            toast.error(
+                "Failed to create product"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
     /* =========================
        DELETE PRODUCT
@@ -228,8 +323,72 @@ export default function AdminProductsPage() {
         fetchProducts();
     }, [category]);
 
+    const addVariant = () => {
+        setVariants([
+            ...variants,
+            {
+                color: "",
+                stock: "",
+                images: [],
+            },
+        ]);
+    };
+
+    const removeVariant = (
+        index: number
+    ) => {
+        setVariants(
+            variants.filter(
+                (_, i) => i !== index
+            )
+        );
+    };
+
+    const updateVariantColor = (
+        index: number,
+        value: string
+    ) => {
+        const updated = [...variants];
+
+        updated[index].color =
+            value;
+
+        setVariants(updated);
+    };
+
+    const updateVariantStock = (
+        index: number,
+        value: string
+    ) => {
+        const updated = [...variants];
+
+        updated[index].stock =
+            value;
+
+        setVariants(updated);
+    };
+
+    const updateVariantImages = (
+        index: number,
+        files: File[]
+    ) => {
+        const updated = [...variants];
+
+        updated[index].images =
+            files;
+
+        setVariants(updated);
+    };
 
 
+    const sizes = [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+    ];
     return (
         <div className=" flex flex-col gap-6 overflow-auto">
             {/* HEADER */}
@@ -274,10 +433,14 @@ export default function AdminProductsPage() {
                     />
 
                     <Select
-                        value={category}
-                        onValueChange={setCategory}
-                    >
-                        <SelectTrigger  className="w-full !h-11 bg-white/5 border-white/10 text-sm">
+                        value={formData.category}
+                        onValueChange={(value) =>
+                            setFormData({
+                                ...formData,
+                                category: value,
+                            })
+                        }                    >
+                        <SelectTrigger className="w-full !h-11 bg-white/5 border-white/10 text-sm">
                             <SelectValue placeholder="Collections" />
                         </SelectTrigger>
 
@@ -381,7 +544,7 @@ export default function AdminProductsPage() {
                         className="h-11 bg-white/5 border-white/10 text-sm"
                     />
 
-                    <Input
+                    {/* <Input
                         type="number"
                         placeholder="Stock Quantity"
                         value={formData.stock}
@@ -392,9 +555,9 @@ export default function AdminProductsPage() {
                             })
                         }
                         className="h-11 bg-white/5 border-white/10 text-sm"
-                    />
+                    /> */}
 
-                    <Input
+                    {/* <Input
                         type="text"
                         placeholder="Sizes (S,M,L,XL)"
                         value={formData.sizes}
@@ -405,7 +568,42 @@ export default function AdminProductsPage() {
                             })
                         }
                         className="h-11 bg-white/5 border-white/10 text-sm"
-                    />
+                    /> */}
+                    <div className="space-y-3">
+                        <Label>Sizes</Label>
+
+                        <div className="flex flex-wrap gap-3">
+                            {sizes.map((size) => (
+                                <label
+                                    key={size}
+                                    className="flex items-center gap-2 border rounded-xl px-3 py-2 cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedSizes.includes(
+                                            size
+                                        )}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedSizes([
+                                                    ...selectedSizes,
+                                                    size,
+                                                ]);
+                                            } else {
+                                                setSelectedSizes(
+                                                    selectedSizes.filter(
+                                                        (s) => s !== size
+                                                    )
+                                                );
+                                            }
+                                        }}
+                                    />
+
+                                    {size}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
 
                     <Input
                         type="number"
@@ -455,20 +653,141 @@ export default function AdminProductsPage() {
                         className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
                         required
                     />
+                    {/* <div className="space-y-4 flex justify-content-between gap-5">
+                        <Label className="flex items-center">
+                            Product Images
+                        </Label>
 
-                    <input
-                        type="text"
-                        name="image"
-                        placeholder="Image URL"
-                        value={
-                            formData.image
-                        }
-                        onChange={
-                            handleChange
-                        }
-                        className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm"
-                        required
-                    />
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={
+                                handleImageChange
+                            }
+                        />
+
+                        {uploading && (
+                            <p className="text-sm text-blue-500">
+                                Uploading images...
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid grid-cols-4 gap-3">
+                        {selectedFiles.map(
+                            (file, index) => (
+                                <Image
+                                    key={index}
+                                    src={URL.createObjectURL(file)}
+                                    alt=""
+                                    width={100}
+                                    height={100}
+                                />
+                            )
+                        )}
+                    </div> */}
+
+                    <div className="md:col-span-2 space-y-6">
+                        <Label>
+                            Product Variants
+                        </Label>
+
+                        {variants.map(
+                            (
+                                variant,
+                                index
+                            ) => (
+                                <div
+                                    key={index}
+                                    className="border rounded-xl p-4 space-y-4"
+                                >
+                                    <Input
+                                        placeholder="Color"
+                                        value={
+                                            variant.color
+                                        }
+                                        onChange={(e) =>
+                                            updateVariantColor(
+                                                index,
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    <Input
+                                        type="number"
+                                        placeholder="Stock"
+                                        value={
+                                            variant.stock
+                                        }
+                                        onChange={(e) =>
+                                            updateVariantStock(
+                                                index,
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    <input
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                            updateVariantImages(
+                                                index,
+                                                Array.from(
+                                                    e.target.files ||
+                                                    []
+                                                )
+                                            )
+                                        }
+                                    />
+
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {variant.images.map(
+                                            (
+                                                file,
+                                                fileIndex
+                                            ) => (
+                                                <Image
+                                                    key={fileIndex}
+                                                    src={URL.createObjectURL(
+                                                        file
+                                                    )}
+                                                    alt=""
+                                                    width={100}
+                                                    height={100}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+
+                                    {variants.length >
+                                        1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeVariant(
+                                                        index
+                                                    )
+                                                }
+                                                className="text-red-500"
+                                            >
+                                                Remove Variant
+                                            </button>
+                                        )}
+                                </div>
+                            )
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={addVariant}
+                            className="px-4 py-2 border rounded-xl"
+                        >
+                            + Add Variant
+                        </button>
+                    </div>
 
                     <textarea
                         name="description"
@@ -531,16 +850,14 @@ export default function AdminProductsPage() {
                                 className="grid grid-cols-[80px_1.5fr_1fr_120px_100px] gap-4 items-center px-5 py-4 hover:bg-white/[0.03] transition"
                             >
                                 {/* IMAGE */}
-                                <div className="relative w-12 h-12 rounded-lg overflow-x-hidden">
+                                <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                                     <Image
                                         src={
-                                            product
-                                                .images?.[0] ||
+                                            product.variants?.[0]
+                                                ?.images?.[0] ||
                                             "/placeholder.png"
                                         }
-                                        alt={
-                                            product.title
-                                        }
+                                        alt={product.title}
                                         fill
                                         className="object-cover"
                                     />

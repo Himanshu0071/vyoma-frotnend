@@ -18,6 +18,8 @@ interface CartItem {
   quantity: number;
 
   selectedSize?: string;
+
+  selectedColor?: string;
 }
 
 interface CartStore {
@@ -29,17 +31,20 @@ interface CartStore {
 
   removeFromCart: (
     id: string,
-    selectedSize?: string
+    selectedSize?: string,
+    selectedColor?: string
   ) => void;
 
   increaseQuantity: (
     id: string,
-    selectedSize?: string
+    selectedSize?: string,
+    selectedColor?: string
   ) => void;
 
   decreaseQuantity: (
     id: string,
-    selectedSize?: string
+    selectedSize?: string,
+    selectedColor?: string
   ) => void;
 
   clearCart: () => void;
@@ -67,7 +72,9 @@ export const useCartStore =
                   cartItem._id ===
                     item._id &&
                   cartItem.selectedSize ===
-                    item.selectedSize
+                    item.selectedSize &&
+                  cartItem.selectedColor ===
+                    item.selectedColor
               );
 
             /* ITEM EXISTS */
@@ -78,7 +85,9 @@ export const useCartStore =
                     cartItem._id ===
                       item._id &&
                     cartItem.selectedSize ===
-                      item.selectedSize
+                      item.selectedSize &&
+                    cartItem.selectedColor ===
+                      item.selectedColor
                       ? {
                           ...cartItem,
 
@@ -111,7 +120,8 @@ export const useCartStore =
 
         removeFromCart: (
           id,
-          selectedSize
+          selectedSize,
+          selectedColor
         ) =>
           set((state) => ({
             cart:
@@ -121,7 +131,9 @@ export const useCartStore =
                     item._id ===
                       id &&
                     item.selectedSize ===
-                      selectedSize
+                      selectedSize &&
+                    item.selectedColor ===
+                      selectedColor
                   )
               ),
           })),
@@ -132,7 +144,8 @@ export const useCartStore =
 
         increaseQuantity: (
           id,
-          selectedSize
+          selectedSize,
+          selectedColor
         ) =>
           set((state) => ({
             cart: state.cart.map(
@@ -140,7 +153,9 @@ export const useCartStore =
                 item._id ===
                   id &&
                 item.selectedSize ===
-                  selectedSize
+                  selectedSize &&
+                item.selectedColor ===
+                  selectedColor
                   ? {
                       ...item,
 
@@ -158,7 +173,8 @@ export const useCartStore =
 
         decreaseQuantity: (
           id,
-          selectedSize
+          selectedSize,
+          selectedColor
         ) =>
           set((state) => ({
             cart: state.cart.map(
@@ -166,7 +182,9 @@ export const useCartStore =
                 item._id ===
                   id &&
                 item.selectedSize ===
-                  selectedSize
+                  selectedSize &&
+                item.selectedColor ===
+                  selectedColor
                   ? {
                       ...item,
 

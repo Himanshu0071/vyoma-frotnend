@@ -89,109 +89,102 @@ export default function Navbar() {
 
           {/* DESKTOP MENU */}
           <nav className="hidden md:flex items-center gap-10">
-          {navLinks.map((item) => {
-  /* COLLECTIONS DROPDOWN */
-  if (
-    item.name ===
-    "Collections"
-  ) {
-    const collections = [
-      "tshirts",
-      "shirts",
-      "vest",
-      "kurta",
-      "jeans",
-      "pant",
-      "shoes",
-      "trousers",
-      "cargo",
-      "joggers",
-      "shorts",
-    ];
+            {navLinks.map((item) => {
+              /* COLLECTIONS DROPDOWN */
+              if (
+                item.name ===
+                "Collections"
+              ) {
+                const collections = [
+                  "tshirts",
+                  "shirts",
+                  "vest",
+                  "kurta",
+                  "jeans",
+                  "pant",
+                  "shoes",
+                  "trousers",
+                  "cargo",
+                  "joggers",
+                  "shorts",
+                ];
 
-    return (
-      <div
-        key={item.name}
-        className="relative group"
-      >
-        {/* BUTTON */}
-        <button className="text-sm font-medium hover:text-purple-400 transition duration-300">
-          Collections
-        </button>
-
-        {/* DROPDOWN */}
-        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-          
-          <div className="w-[320px] bg-[#111827]/95 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl">
-            
-            {/* TITLE */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-white">
-                Explore Collections
-              </h3>
-
-              <p className="text-xs text-gray-400 mt-1">
-                Premium fashion categories
-              </p>
-            </div>
-
-            {/* COLLECTION GRID */}
-            <div className="grid grid-cols-2 gap-2">
-              {collections.map(
-                (
-                  collection
-                ) => (
-                  <Link
-                    key={
-                      collection
-                    }
-                    href={`/collections/${collection}`}
-                    className="px-4 py-3 rounded-2xl text-sm capitalize hover:bg-white/5 hover:text-purple-400 transition"
+                return (
+                  <div
+                    key={item.name}
+                    className="relative group"
                   >
-                    {
-                      collection
-                    }
-                  </Link>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+                    {/* BUTTON */}
+                    <button className="text-sm font-medium hover:text-purple-400 transition duration-300">
+                      Collections
+                    </button>
 
-  /* NORMAL LINKS */
-  return (
-    <Link
-      key={item.name}
-      href={item.href}
-      className="text-sm font-medium hover:text-purple-400 transition duration-300"
-    >
-      {item.name}
-    </Link>
-  );
-})}
+                    {/* DROPDOWN */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+
+                      <div className="w-[320px] bg-[#111827]/95 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl">
+
+                        {/* TITLE */}
+                        <div className="mb-4">
+                          <h3 className="text-sm font-semibold text-white">
+                            Explore Collections
+                          </h3>
+
+                          <p className="text-xs text-gray-400 mt-1">
+                            Premium fashion categories
+                          </p>
+                        </div>
+
+                        {/* COLLECTION GRID */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {collections.map(
+                            (
+                              collection
+                            ) => (
+                              <Link
+                                key={
+                                  collection
+                                }
+                                href={`/collections/${collection}`}
+                                className="px-4 py-3 rounded-2xl text-sm capitalize hover:bg-white/5 hover:text-purple-400 transition"
+                              >
+                                {
+                                  collection
+                                }
+                              </Link>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              /* NORMAL LINKS */
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm font-medium hover:text-purple-400 transition duration-300"
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
 
             {/* ADMIN LINKS */}
             {user?.role ===
               "admin" && (
-              <>
-                <Link
-                  href="/admin/products"
+                <>
+                  <Link
+                    href="/admin"
                   className="text-sm font-medium text-orange-500 hover:text-orange-400 transition"
-                >
-                  Products
-                </Link>
-
-                <Link
-                  href="/admin/orders"
-                  className="text-sm font-medium text-pink-500 hover:text-pink-400 transition"
-                >
-                  Orders
-                </Link>
-              </>
-            )}
+                  >
+                    ERP
+                  </Link>
+                </>
+              )}
           </nav>
 
           {/* RIGHT SIDE */}
@@ -216,12 +209,12 @@ export default function Navbar() {
 
               {wishlist.length >
                 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-pink-500 text-white text-[10px] flex items-center justify-center font-semibold">
-                  {
-                    wishlist.length
-                  }
-                </span>
-              )}
+                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-pink-500 text-white text-[10px] flex items-center justify-center font-semibold">
+                    {
+                      wishlist.length
+                    }
+                  </span>
+                )}
             </Link>
 
             {/* CART */}
@@ -240,10 +233,10 @@ export default function Navbar() {
 
               {cart.length >
                 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-semibold">
-                  {cart.length}
-                </span>
-              )}
+                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-semibold">
+                    {cart.length}
+                  </span>
+                )}
             </button>
 
             {/* THEME */}
@@ -261,7 +254,7 @@ export default function Navbar() {
                 <FontAwesomeIcon
                   icon={
                     theme ===
-                    "dark"
+                      "dark"
                       ? faSun
                       : faMoon
                   }
@@ -355,22 +348,22 @@ export default function Navbar() {
               {/* ADMIN LINKS MOBILE */}
               {user?.role ===
                 "admin" && (
-                <>
-                  <Link
-                    href="/admin/products"
-                    className="text-sm font-medium text-orange-500"
-                  >
-                    Admin Products
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin/products"
+                      className="text-sm font-medium text-orange-500"
+                    >
+                      Admin Products
+                    </Link>
 
-                  <Link
-                    href="/admin/orders"
-                    className="text-sm font-medium text-pink-500"
-                  >
-                    Admin Orders
-                  </Link>
-                </>
-              )}
+                    <Link
+                      href="/admin/orders"
+                      className="text-sm font-medium text-pink-500"
+                    >
+                      Admin Orders
+                    </Link>
+                  </>
+                )}
 
               {user ? (
                 <>

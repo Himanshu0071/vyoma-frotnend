@@ -7,17 +7,24 @@ const API_URL =
    CREATE PRODUCT
 ========================= */
 
-export const createProduct = async (
-  productData: any
-) => {
-  const response = await axios.post(
-    `${API_URL}/products`,
-    productData
-  );
+export const createProduct =
+  async (
+    productData: FormData
+  ) => {
+    const response =
+      await axios.post(
+        `${API_URL}/products`,
+        productData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
+      );
 
-  return response.data;
-};
-
+    return response.data;
+  };
 /* =========================
    DELETE PRODUCT
 ========================= */
@@ -31,27 +38,3 @@ export const deleteProduct = async (
 
   return response.data;
 };
-
-/* =========================
-   IMAGE UPLOAD
-========================= */
-
-export const uploadImage =
-  async (file: File) => {
-    const formData = new FormData();
-
-    formData.append("image", file);
-
-    const response = await axios.post(
-      `${API_URL}/upload`,
-      formData,
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
-
-    return response.data;
-  };

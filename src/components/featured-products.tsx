@@ -35,7 +35,7 @@ export default function FeaturedProducts() {
   console.log(products, "data")
 
   return (
-    <section className="py-14">
+    <section className="py-4">
       <div className="container-custom">
 
         {/* Heading */}
